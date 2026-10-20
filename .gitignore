@@ -8,4 +8,18 @@ wheels/
 
 # Virtual environments
 .venv
+venv/
+ENV/
 .env
+
+# ChromaDB local storage & caches
+.chroma_db/
+data/.processed_files.json
+*.db
+*.sqlite3
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

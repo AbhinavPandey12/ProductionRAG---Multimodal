@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multimodal RAG Studio — Document Intelligence & Vision</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navbar Header -->
+    <header class="navbar">
+      <div class="brand">
+        <div class="logo-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <div>
+          <h1>Multimodal RAG Studio</h1>
+          <div class="subtitle">AI Document Analysis with Gemini Multimodal Embeddings & Vision</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span id="health-badge" class="badge badge-neutral">
+          <span class="status-dot"></span> Checking backend…
+        </span>
+      </div>
+    </header>
+
+    <!-- Tabs Navigation -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="chat">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        Ask Questions & RAG Insights
+      </button>
+      <button class="tab-btn" data-tab="upload">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="16 16 12 12 8 16"></polyline>
+          <line x1="12" y1="12" x2="12" y2="21"></line>
+          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+        </svg>
+        Document Management & Upload
+      </button>
+    </nav>
+
+    <!-- Tab 1: Chat / Query Pane -->
+    <main id="tab-chat" class="tab-pane active">
+      <!-- Controls & Filter Bar -->
+      <section class="card" style="padding: 1.25rem; margin-bottom: 1.25rem;">
+        <div class="filter-bar" style="margin-top:0">
+          <div class="filter-item filter-small">
+            <label for="modelSelect">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Model
+            </label>
+            <select id="modelSelect">
+              <option value="gemini" selected>Gemini 2.0 Flash</option>
+              <option value="groq">Groq Llama 3.3</option>
+              <option value="bedrock">Amazon Bedrock (Claude / Nova)</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="docFilter">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              Filter Document
+            </label>
+            <select id="docFilter">
+              <option value="">All indexed documents</option>
+            </select>
+          </div>
+          <div class="filter-item filter-small">
+            <label for="pageFilter">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+              Page #
+            </label>
+            <input type="number" id="pageFilter" placeholder="Optional" min="1" />
+          </div>
+          <div class="filter-item filter-small">
+            <label for="limitSelect">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              Context Limit
+            </label>
+            <select id="limitSelect">
+              <option value="2">Top 2</option>
+              <option value="4" selected>Top 4 (Recommended)</option>
+              <option value="6">Top 6</option>
+              <option value="8">Top 8</option>
+            </select>
+          </div>
+          <div class="filter-item filter-small" style="justify-content: flex-end;">
+            <label>&nbsp;</label>
+            <button id="clearChatBtn" class="btn btn-secondary" style="height:38px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Clear
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chat Feed Display -->
+      <section class="card" style="padding:0; overflow:hidden;">
+        <div id="chat-feed" class="chat-feed" style="min-height: 460px; max-height: 580px; overflow-y: auto; padding: 1.5rem;">
+          <div class="welcome-card">
+            <h3>Multimodal Document Assistant</h3>
+            <p>Ask complex questions about your documents, financial charts, circuit diagrams, equations, and tables. The assistant retrieves relevant pages with vector similarity and synthesizes visual context with Google Gemini.</p>
+            <div class="capabilities-grid">
+              <div class="capability-item">
+                <span class="cap-badge cap-tool">Document RAG</span>
+                <p>Retrieves specific pages from indexed PDFs with citations and distance metrics.</p>
+                <button class="prompt-chip">Summarize the main topics in the document</button>
+              </div>
+              <div class="capability-item">
+                <span class="cap-badge cap-direct">Multimodal Vision</span>
+                <p>Attach or paste an image, diagram, or circuit to query along with the document.</p>
+                <button class="prompt-chip">Explain the diagram on page 1</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input Area inside card footer -->
+        <div style="padding: 1.25rem; border-top: 1px solid var(--border-color); background: var(--bg-secondary);">
+          <!-- Attached Image Preview Container -->
+          <div id="attachedImageContainer" class="attached-image-container hidden">
+            <div class="attached-image-thumb-wrap">
+              <img src="" alt="Thumbnail preview" />
+            </div>
+            <div class="attached-image-info">
+              <div class="attached-image-name">attachment.png</div>
+              <div class="attached-image-size">0 KB</div>
+            </div>
+            <button type="button" class="btn-icon remove-attach-btn" onclick="clearAttachedImage()" title="Remove image">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+
+          <!-- Query Input Wrap -->
+          <form id="query-form">
+            <div class="query-input-wrap">
+              <textarea id="questionInput" placeholder="Ask a question about the document... (Press Enter to send, Shift+Enter for new line)" rows="2"></textarea>
+              <div class="input-actions">
+                <div class="input-left-tools">
+                  <input type="file" id="imageInput" accept="image/*" hidden />
+                  <button type="button" id="attachImageBtn" class="btn btn-attach" title="Attach an image/diagram">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    Attach Image
+                  </button>
+                  <span class="paste-hint">Drag &amp; drop image here</span>
+                </div>
+                <button type="submit" id="sendBtn" class="btn btn-primary">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  Send Query
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <!-- Tab 2: Upload & Management Pane -->
+    <main id="tab-upload" class="tab-pane">
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+        <div>
+          <!-- Drop Zone Card -->
+          <section class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Ingest PDF Documents
+              </h2>
+            </div>
+            <p class="section-desc">Drop PDF textbooks, financial reports, or lecture notes here. Each page is rendered to high-resolution PNG, embedded with Gemini multimodal embeddings, and indexed into the vector store.</p>
+
+            <div id="drop-zone" class="drop-zone">
+              <input type="file" id="pdfFileInput" accept="application/pdf" multiple hidden />
+              <div class="drop-zone-icon">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="12" y1="18" x2="12" y2="12"></line>
+                  <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+              </div>
+              <h3>Drag &amp; drop PDF files here</h3>
+              <p>or <span class="browse-link">browse files</span> from your computer</p>
+              <span class="file-format-hint">Supports PDF up to 100MB</span>
+            </div>
+
+            <!-- Staging Area -->
+            <div id="stagingArea" class="file-staging-area hidden">
+              <div class="staging-header">
+                <div class="staging-title">
+                  <strong>Staged Documents</strong>
+                </div>
+                <button id="clearStagedBtn" class="btn btn-sm btn-secondary">Clear all</button>
+              </div>
+              <div id="stagedFilesList" class="staged-files-list"></div>
+              <button id="uploadBtn" class="btn btn-primary btn-block">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+                Upload &amp; Ingest Staged Files
+              </button>
+            </div>
+
+            <!-- Upload Results Box -->
+            <div id="uploadResults" style="margin-top: 1rem;"></div>
+          </section>
+        </div>
+
+        <!-- Sidebar: Indexed Documents -->
+        <div>
+          <section class="card">
+            <div class="card-header">
+              <h2 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                Indexed Library
+              </h2>
+            </div>
+            <p class="section-desc">Documents currently searchable in ChromaDB vector store:</p>
+            <ul id="indexed-docs-list" style="list-style: none; display: flex; flex-direction: column; gap: 8px; padding: 0;">
+              <li style="color: var(--text-muted); font-size: 0.9rem;">Loading documents…</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

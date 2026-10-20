@@ -1,0 +1,11 @@
+__pycache__/
+*.py[oc]
+.venv/
+venv/
+.env
+.git/
+.gitignore
+.chroma_db/
+data/.processed_files.json
+*.db
+*.sqlite3
